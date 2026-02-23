@@ -1,0 +1,24 @@
+- name: Check if OS is Ubuntu or Debian
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['os_family'] == 'Debian'
+    fail_msg: "This playbook only supports Ubuntu/Debian."
+
+- name: Download Wazuh agent directly on target VM
+  ansible.builtin.get_url:
+    url: "https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_{{ wazuh_agent_version | default('4.12.0-1') }}_amd64.deb"
+    dest: "/tmp/wazuh-agent.deb"
+    mode: '0644'
+
+- name: Install Wazuh agent package
+  ansible.builtin.apt:
+    deb: "/tmp/wazuh-agent.deb"
+  environment:
+    WAZUH_MANAGER: "{{ ludus_wazuh_siem_server }}"
+
+- name: Ensure wazuh-agent is started and enabled
+  ansible.builtin.systemd:
+    name: wazuh-agent
+    state: started
+    enabled: true
+    daemon_reload: true

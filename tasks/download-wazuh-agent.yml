@@ -1,3 +1,4 @@
+# ----------- Windows -----------
 - name: Check if Wazuh agent bin exists on Ludus for Windows targets
   ansible.builtin.stat:
     path: "{{ ludus_install_directory }}/resources/windows/wazuh-agent-4.7.3-1.msi"
@@ -21,3 +22,10 @@
   ansible.windows.win_copy:
     src: "{{ ludus_install_directory }}/resources/windows/wazuh-agent-4.7.3-1.msi"
     dest: "{{ ludus_wazuh_install_directory }}"
+
+# ----------- Linux (Debian/Ubuntu) -----------
+- name: Download Wazuh agent directly on target VM
+  ansible.builtin.get_url:
+    url: "https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_{{ wazuh_agent_version | default('4.12.0-1') }}_amd64.deb"
+    dest: "/tmp/wazuh-agent.deb"
+    mode: '0644'
