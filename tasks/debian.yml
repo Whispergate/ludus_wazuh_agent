@@ -4,17 +4,15 @@
       - ansible_facts['os_family'] == 'Debian'
     fail_msg: "This playbook only supports Ubuntu/Debian."
 
-# Transfer to target VM
-- name: Copy Wazuh agent .deb to target VM
-  ansible.builtin.copy:
-    src: "{{ wazuh_agent_local_path }}"
-    dest: "{{ wazuh_agent_remote_path }}"
+- name: Download Wazuh agent directly on target VM
+  ansible.builtin.get_url:
+    url: "https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_{{ wazuh_agent_version | default('4.12.0-1') }}_amd64.deb"
+    dest: "/tmp/wazuh-agent.deb"
     mode: '0644'
 
-# Install on target VM
 - name: Install Wazuh agent package
   ansible.builtin.apt:
-    deb: "{{ wazuh_agent_remote_path }}"
+    deb: "/tmp/wazuh-agent.deb"
   environment:
     WAZUH_MANAGER: "{{ ludus_wazuh_siem_server }}"
 
