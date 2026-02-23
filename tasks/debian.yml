@@ -1,0 +1,34 @@
+- name: Download and install Wazuh agent on Ubuntu
+  hosts: all
+  become: true
+
+  tasks:
+    - block:
+        - name: Check if OS is Ubuntu or Debian
+          ansible.builtin.assert:
+            that:
+              - ansible_facts['os_family'] == 'Debian'
+            fail_msg: "This playbook only supports Ubuntu/Debian."
+
+        - name: Download Wazuh agent .deb package
+          get_url:
+            url: "{{ wazuh_agent_deb_url }}"
+            dest: "/tmp/{{ wazuh_agent_deb_file }}"
+
+        - name: Install Wazuh agent package
+          command: WAZUH_MANAGER='{{ wazuh_manager_host }}' dpkg -i /tmp/{{ wazuh_agent_deb_file }}
+
+        - name: Reload systemd daemon
+          command: systemctl daemon-reload
+
+        - name: Enable wazuh-agent service
+          command: systemctl enable wazuh-agent
+
+        - name: Start wazuh-agent service
+          command: systemctl start wazuh-agent
+
+        - name: Ensure wazuh-agent service is started and enabled
+          systemd:
+            name: wazuh-agent
+            state: started
+            enabled: yes
