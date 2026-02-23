@@ -4,11 +4,6 @@
       - ansible_facts['os_family'] == 'Debian'
     fail_msg: "This playbook only supports Ubuntu/Debian."
 
-- name: Validate wazuh_manager_host is defined
-  ansible.builtin.fail:
-    msg: "wazuh_manager_host must be defined. Set it in role_vars or vars."
-  when: wazuh_manager_host | length == 0
-
 # Transfer to target VM
 - name: Copy Wazuh agent .deb to target VM
   ansible.builtin.copy:
