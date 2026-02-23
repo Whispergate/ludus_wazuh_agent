@@ -14,4 +14,4 @@ ludus_install_directory: /opt/ludus
 wazuh_agent_deb_url: "https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_{{ wazuh_agent_version }}_{{ wazuh_agent_arch }}.deb"
 wazuh_agent_deb_file: "wazuh-agent_{{ wazuh_agent_version }}_{{ wazuh_agent_arch }}.deb"
 wazuh_agent_local_path: "{{ ludus_install_directory }}/resources/linux/{{ wazuh_agent_deb_file }}"
-wazuh_agent_remote_path: "/tmp/{{ wazuh_agent_deb_file }}"
+wazuh_agent_remote_path: "/tmp/wazuh-agent.deb"
