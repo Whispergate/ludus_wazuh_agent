@@ -1,34 +1,31 @@
-- name: Download and install Wazuh agent on Ubuntu
-  hosts: all
-  become: true
+- name: Check if OS is Ubuntu or Debian
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['os_family'] == 'Debian'
+    fail_msg: "This playbook only supports Ubuntu/Debian."
 
-  tasks:
-    - block:
-        - name: Check if OS is Ubuntu or Debian
-          ansible.builtin.assert:
-            that:
-              - ansible_facts['os_family'] == 'Debian'
-            fail_msg: "This playbook only supports Ubuntu/Debian."
+- name: Validate wazuh_manager_host is defined
+  ansible.builtin.fail:
+    msg: "wazuh_manager_host must be defined. Set it in role_vars or vars."
+  when: wazuh_manager_host | length == 0
 
-        - name: Download Wazuh agent .deb package
-          get_url:
-            url: "{{ wazuh_agent_deb_url }}"
-            dest: "/tmp/{{ wazuh_agent_deb_file }}"
+# Transfer to target VM
+- name: Copy Wazuh agent .deb to target VM
+  ansible.builtin.copy:
+    src: "{{ wazuh_agent_local_path }}"
+    dest: "{{ wazuh_agent_remote_path }}"
+    mode: '0644'
 
-        - name: Install Wazuh agent package
-          command: WAZUH_MANAGER='{{ wazuh_manager_host }}' dpkg -i /tmp/{{ wazuh_agent_deb_file }}
+# Install on target VM
+- name: Install Wazuh agent package
+  ansible.builtin.apt:
+    deb: "{{ wazuh_agent_remote_path }}"
+  environment:
+    WAZUH_MANAGER: "{{ ludus_wazuh_siem_server }}"
 
-        - name: Reload systemd daemon
-          command: systemctl daemon-reload
-
-        - name: Enable wazuh-agent service
-          command: systemctl enable wazuh-agent
-
-        - name: Start wazuh-agent service
-          command: systemctl start wazuh-agent
-
-        - name: Ensure wazuh-agent service is started and enabled
-          systemd:
-            name: wazuh-agent
-            state: started
-            enabled: yes
+- name: Ensure wazuh-agent is started and enabled
+  ansible.builtin.systemd:
+    name: wazuh-agent
+    state: started
+    enabled: true
+    daemon_reload: true

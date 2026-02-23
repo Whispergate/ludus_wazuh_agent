@@ -24,16 +24,23 @@
     dest: "{{ ludus_wazuh_install_directory }}"
 
 # ----------- Linux (Debian/Ubuntu) -----------
-- name: Check if Wazuh agent .deb exists on Ludus for Linux targets
+- name: Ensure resources directory exists on Ludus server
+  ansible.builtin.file:
+    path: "{{ ludus_install_directory }}/resources/linux"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+
+- name: Check if Wazuh agent .deb exists on Ludus server
   ansible.builtin.stat:
-    path: "{{ ludus_install_directory }}/resources/linux/wazuh-agent-4.12.0-1_amd64.deb"
+    path: "{{ wazuh_agent_local_path }}"
   register: linux_agent_exists
   delegate_to: localhost
 
-- name: Download the Linux Wazuh agent if it doesn't exist
+- name: Download Wazuh agent .deb to Ludus server
   ansible.builtin.get_url:
-    url: "https://packages.wazuh.com/4.x/apt/pool/main/w/wazuh-agent/wazuh-agent_4.12.0-1_amd64.deb"
-    dest: "{{ ludus_install_directory }}/resources/linux/wazuh-agent-4.12.0-1_amd64.deb"
-    mode: "0644"
+    url: "{{ wazuh_agent_deb_url }}"
+    dest: "{{ wazuh_agent_local_path }}"
+    mode: '0644'
   delegate_to: localhost
   when: not linux_agent_exists.stat.exists
