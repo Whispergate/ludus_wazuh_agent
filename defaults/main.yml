@@ -1,7 +1,7 @@
 ---
 # Wazuh agent configuration
 ludus_wazuh_siem_server: ""
-wazuh_agent_version: "4.14"
+wazuh_agent_version: "4.14.7-1"
 wazuh_agent_arch: "amd64"
 
 # Windows settings
